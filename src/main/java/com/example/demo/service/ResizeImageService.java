@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -53,7 +55,18 @@ public class ResizeImageService {
 		Dimension imgSize = new Dimension(img.getWidth(), img.getHeight());
 		Dimension boundary = new Dimension(widthTarget, heightTarget);
 		Dimension targetScaled = getScaledDimension(imgSize,boundary);
-		ImageIO.write(resizeImage(img,targetScaled),imgType, baos);
+		BufferedImage resizedImage = resizeImage(img, targetScaled);
+		if (resizedImage.getColorModel().hasAlpha()) {
+			BufferedImage whiteBackgroundImage = new BufferedImage(resizedImage.getWidth(), resizedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+		    Graphics2D g2d = whiteBackgroundImage.createGraphics();
+		    g2d.setColor(Color.WHITE);
+		    g2d.fillRect(0, 0, whiteBackgroundImage.getWidth(), whiteBackgroundImage.getHeight());
+		    g2d.drawImage(resizedImage, 0, 0, null);
+		    g2d.dispose();
+		    ImageIO.write(whiteBackgroundImage, imgType, baos);
+        } else {
+        	ImageIO.write(resizedImage, imgType, baos);
+        }
 		return baos;
 	}
 }
